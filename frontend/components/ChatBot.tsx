@@ -15,7 +15,7 @@ export default function ChatBot() {
   const [messages, setMessages] = useState<Message[]>([
     {
       sender: "aero",
-      text: "Hello! I am Aero, your AI flight safety assistant. Ask me anything about avionic sensors, predicted failure metrics, SHAP/LIME explanation data, or edge safety protocols.",
+      text: "Welcome to AeroSentinel AI Assistant! ✈️\n\nI'm here to help you understand the AeroSentinel platform, aircraft safety, Edge AI, Explainable AI, predictive maintenance, system features, and aviation technologies.\n\nHow can I assist you today?",
       timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
     }
   ]);
@@ -78,11 +78,11 @@ export default function ChatBot() {
     window.speechSynthesis.speak(utterance);
   };
 
-  const handleSendMessage = async (e?: React.FormEvent) => {
+  const handleSendMessage = async (textToSend?: string, e?: React.FormEvent) => {
     if (e) e.preventDefault();
-    if (!inputMsg.trim()) return;
+    const userText = textToSend || inputMsg;
+    if (!userText.trim()) return;
 
-    const userText = inputMsg;
     setInputMsg("");
     
     // Add user message
@@ -124,6 +124,15 @@ export default function ChatBot() {
     }
   };
 
+  const sampleQuestions = [
+    "What is AeroSentinel?",
+    "Explain Edge AI",
+    "What is Explainable AI?",
+    "Explain SHAP & LIME",
+    "Predictive maintenance",
+    "Technologies used"
+  ];
+
   return (
     <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end">
       
@@ -134,19 +143,19 @@ export default function ChatBot() {
             initial={{ opacity: 0, y: 30, scale: 0.95 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 30, scale: 0.95 }}
-            className="mb-4 flex flex-col w-[350px] sm:w-[380px] h-[500px] rounded-2xl border border-slate-800 bg-slate-950/90 shadow-2xl backdrop-blur-xl overflow-hidden"
+            className="mb-4 flex flex-col w-[350px] sm:w-[400px] h-[520px] rounded-2xl border border-slate-800 bg-slate-950/95 shadow-2xl backdrop-blur-xl overflow-hidden"
           >
             {/* Header */}
-            <div className="flex items-center justify-between border-b border-slate-900 bg-slate-900/40 px-4 py-3.5">
+            <div className="flex items-center justify-between border-b border-slate-900 bg-slate-900/60 px-4 py-3.5">
               <div className="flex items-center space-x-3">
                 <div className="relative flex h-8 w-8 items-center justify-center rounded-full bg-cyan-500/10 border border-cyan-500/20">
                   <span className="h-4 w-4 bg-cyan-400 rounded-full animate-pulse shadow-md shadow-cyan-400/50" />
                 </div>
                 <div>
-                  <h3 className="text-sm font-bold text-white tracking-wide">AERO Pilot Support</h3>
+                  <h3 className="text-sm font-bold text-white tracking-wide">AeroSentinel AI Assistant</h3>
                   <div className="flex items-center gap-1">
                     <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-ping" />
-                    <span className="text-[10px] font-semibold text-emerald-400">EDGE AI ONLINE</span>
+                    <span className="text-[10px] font-semibold text-emerald-400 uppercase tracking-wider">Aviation Expert System</span>
                   </div>
                 </div>
               </div>
@@ -175,20 +184,20 @@ export default function ChatBot() {
             <div ref={scrollRef} className="flex-1 overflow-y-auto px-4 py-4 space-y-4 scrollbar-thin">
               {messages.map((msg, index) => (
                 <div key={index} className={`flex ${msg.sender === "user" ? "justify-end" : "justify-start"}`}>
-                  <div className={`flex gap-2 max-w-[82%] ${msg.sender === "user" ? "flex-row-reverse" : "flex-row"}`}>
+                  <div className={`flex gap-2 max-w-[85%] ${msg.sender === "user" ? "flex-row-reverse" : "flex-row"}`}>
                     
                     {msg.sender === "aero" ? (
-                      <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-cyan-950 border border-cyan-800 text-cyan-400">
+                      <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-cyan-950 border border-cyan-800 text-cyan-400 mt-0.5">
                         <Bot className="h-4 w-4" />
                       </div>
                     ) : (
-                      <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-slate-800 border border-slate-700 text-slate-300">
+                      <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-slate-800 border border-slate-700 text-slate-300 mt-0.5">
                         <User className="h-4 w-4" />
                       </div>
                     )}
                     
                     <div>
-                      <div className={`rounded-2xl px-3.5 py-2.5 text-xs leading-relaxed ${
+                      <div className={`rounded-2xl px-3.5 py-2.5 text-xs leading-relaxed whitespace-pre-line ${
                         msg.sender === "user"
                           ? "bg-gradient-to-r from-cyan-600 to-blue-600 text-white rounded-tr-none"
                           : "bg-slate-900 border border-slate-800/80 text-slate-300 rounded-tl-none"
@@ -220,8 +229,21 @@ export default function ChatBot() {
               )}
             </div>
 
+            {/* Quick Sample Questions Pills */}
+            <div className="px-3 py-2 border-t border-slate-900/80 bg-slate-950/80 overflow-x-auto flex gap-1.5 scrollbar-none">
+              {sampleQuestions.map((q, idx) => (
+                <button
+                  key={idx}
+                  onClick={() => handleSendMessage(q)}
+                  className="shrink-0 bg-slate-900 hover:bg-slate-850 hover:text-cyan-400 text-slate-400 border border-slate-800 px-2.5 py-1 rounded-full text-[10px] font-medium transition-all"
+                >
+                  {q}
+                </button>
+              ))}
+            </div>
+
             {/* Input Form */}
-            <form onSubmit={handleSendMessage} className="border-t border-slate-900 bg-slate-950 p-3 flex items-center space-x-2">
+            <form onSubmit={(e) => handleSendMessage(undefined, e)} className="border-t border-slate-900 bg-slate-950 p-3 flex items-center space-x-2">
               <button
                 type="button"
                 onClick={startSpeechRecognition}
@@ -238,7 +260,7 @@ export default function ChatBot() {
                 type="text"
                 value={inputMsg}
                 onChange={(e) => setInputMsg(e.target.value)}
-                placeholder="Ask about engine temperature, faults, SHAP..."
+                placeholder="Ask about aircraft safety, Edge AI, SHAP, LIME..."
                 className="flex-1 bg-slate-900 border border-slate-850 rounded-lg px-3 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-cyan-500"
               />
               <button

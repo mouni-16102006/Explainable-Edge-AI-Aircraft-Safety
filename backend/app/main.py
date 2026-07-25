@@ -12,7 +12,7 @@ from pydantic import BaseModel
 
 from app.auth import (
     USERS_DB, verify_password, get_password_hash, create_access_token,
-    get_current_user, create_access_token
+    get_current_user
 )
 from app.model import FEATURE_NAMES, LABEL_NAMES, predict_safety, models
 from app.explain import calculate_shap_values, calculate_lime_explanation
@@ -27,7 +27,7 @@ app = FastAPI(
 # CORS Configuration for React Frontend
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"], # In development, allow all. Change to specific domain for production
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -100,10 +100,8 @@ async def signup(user_data: SignupRequest):
 
 @app.post("/api/predict")
 async def predict(data: PredictionRequest):
-    # Validate features
     for feat in FEATURE_NAMES:
         if feat not in data.sensors:
-            # fill missing values with nominals
             nominals = {
                 "engine_temp": 95.0, "oil_pressure": 55.0, "hydraulic_pressure": 3000.0,
                 "fuel_flow": 2500.0, "fuel_pressure": 40.0, "vibration": 3.5, "rpm": 8500.0,
@@ -134,7 +132,7 @@ async def get_lime(data: PredictionRequest, target: str = Query(..., description
 class ReportDownloadRequest(BaseModel):
     sensors: Dict[str, float]
     predictions: Dict[str, Any]
-    format: str # "pdf", "xlsx", "csv"
+    format: str
 
 @app.post("/api/reports/download")
 async def download_report(req: ReportDownloadRequest):
@@ -164,59 +162,128 @@ async def download_report(req: ReportDownloadRequest):
     else:
         raise HTTPException(status_code=400, detail="Invalid format. Supported: pdf, xlsx, csv")
 
-# ----------------- CHATBOT "AERO" -----------------
+# ----------------- AEROSENTINEL AI ASSISTANT CHATBOT -----------------
 
 @app.post("/api/chatbot/query")
 async def chat_query(req: ChatRequest):
-    msg = req.message.lower()
+    msg = req.message.lower().strip()
     
-    # Simple semantic rule-based response parser for aviation safety, explainable AI, and edge sensors
-    if "hello" in msg or "hi" in msg:
+    # 1. Greeting Handlers
+    if any(k in msg for k in ["hello", "hi", "hey", "greetings", "start"]):
         response = (
-            "Hello Captain! I'm Aero, your onboard Edge AI Safety assistant. "
-            "I monitor flight telemetry in real-time. Ask me about system faults, sensors, or AI confidence!"
+            "Welcome to AeroSentinel AI Assistant! ✈️\n\n"
+            "I'm here to help you understand the AeroSentinel platform, aircraft safety, Edge AI, "
+            "Explainable AI, predictive maintenance, system features, and aviation technologies.\n\n"
+            "How can I assist you today?"
         )
-    elif "engine" in msg and ("fail" in msg or "fault" in msg or "hot" in msg):
+    
+    # 2. What is AeroSentinel?
+    elif "what is aerosentinel" in msg or ("about" in msg and "project" in msg):
         response = (
-            "Engine faults are usually predicted when engine core temperature exceeds 120°C and oil pressure drops below 40 PSI. "
-            "If RPM exceeds 10,500 under load, it creates mechanical fatigue. Our Random Forest model detects these anomalies "
-            "within milliseconds on the avionics edge hardware."
+            "AeroSentinel is an intelligent aircraft safety decision support platform that combines "
+            "Edge Artificial Intelligence (Edge AI), Explainable AI (XAI), and real-time aircraft telemetry.\n\n"
+            "• Analyzes live sensor data (temperatures, pressures, vibration, voltage, RPM).\n"
+            "• Predicts component failures before they become dangerous.\n"
+            "• Explains WHY predictions were made using SHAP and LIME.\n"
+            "• Operates on low-latency onboard edge computing hardware for zero-delay offline safety decision support."
         )
-    elif "hydraulic" in msg or "flight control" in msg:
+
+    # 3. How does Edge AI work / Benefits?
+    elif "edge ai" in msg or "edge computing" in msg:
         response = (
-            "Hydraulic line leaks cause pressure drops below 2,500 PSI. Combined with high airframe vibration, "
-            "this leads to flight control stiffness or landing gear lockups. We monitor hydraulic pressure and wing "
-            "accel sensors at 1Hz."
+            "Edge AI processes telemetry predictions locally on physical avionic micro-nodes rather than routing over satellites to remote clouds.\n\n"
+            "Key Advantages:\n"
+            "• Low Latency: Sub-2ms decision loops vs 350-800ms cloud lag.\n"
+            "• Offline Autonomy: Continues working 100% even if satellite links drop.\n"
+            "• Bandwidth Savings: Eliminates expensive streaming of raw 100Hz sensor feeds over SATCOM.\n"
+            "• Data Security: Keeps flight telemetry contained onboard."
         )
-    elif "shap" in msg or "explain" in msg or "lime" in msg:
+
+    # 4. What is Explainable AI (XAI) / SHAP / LIME?
+    elif "explainable ai" in msg or "shap" in msg or "lime" in msg or "xai" in msg:
         response = (
-            "SHAP (Shapley Additive exPlanations) attributes a risk percentage contribution to each sensor. "
-            "LIME builds localized surrogate linear models to create human-readable safety envelopes (e.g. 'voltage < 24.5V'). "
-            "Together, they make our black-box ML models completely auditable by flight pilots and safety authorities."
+            "Explainable AI (XAI) converts black-box neural networks and tree ensembles into transparent, auditable decision paths.\n\n"
+            "AeroSentinel uses two primary XAI frameworks:\n"
+            "• SHAP (Shapley Additive exPlanations): Calculates mathematical Shapley contribution weights showing which sensors increased or decreased total failure risk.\n"
+            "• LIME (Local Interpretable Model-agnostic Explanations): Builds localized linear surrogate models creating human-readable rule thresholds (e.g. Engine Temp > 120°C)."
         )
-    elif "edge" in msg or "latency" in msg:
+
+    # 5. Predictive Maintenance & Anomaly Detection
+    elif "predictive maintenance" in msg or "anomaly detection" in msg or "risk" in msg:
         response = (
-            "Edge AI processes telemetry directly on the aircraft's avionic computers. This reduces data latency from 350ms "
-            "(cloud routing) to less than 2ms, bypasses satellite bandwidth constraints, guarantees pilot privacy, "
-            "and ensures safety operations continue even when offline."
+            "Predictive maintenance uses machine learning classifiers to estimate mechanical degradation before physical breakage.\n\n"
+            "AeroSentinel constantly monitors 15 sensor variables (engine core heat, oil pressure, hydraulic line pressure, wing vibration, electrical bus voltage).\n"
+            "When sensor correlations drift from nominal envelopes, the system flags Warning, Critical, or Emergency risk ratings and recommends specific maintenance actions."
         )
-    elif "sensor" in msg or "telemetry" in msg:
+
+    # 6. Deep Learning & ML Models (CNN, LSTM, Transformers, Random Forest)
+    elif any(k in msg for k in ["model", "algorithm", "cnn", "lstm", "transformer", "scikit", "random forest", "xgboost"]):
         response = (
-            "I actively monitor 15 critical flight sensors: thermal sensors (engine/cabin), pressure transceivers "
-            "(oil/fuel/cabin), electrical (voltage/current/soc), structural accelerometers (vibration), and flight "
-            "envelope readings (speed, altitude, wind speed)."
+            "AeroSentinel leverages an ensemble machine learning architecture for multi-output fault classification:\n\n"
+            "• Random Forest & Gradient Boosting (scikit-learn/XGBoost): Primary high-speed tabular classifiers evaluating 6 subsystem failure categories.\n"
+            "• LSTM & Transformers: Time-series sequence forecasting modeling temporal degradation trends over flight hours.\n"
+            "• Convolutional Neural Networks (CNN): Frequency spectrum analysis of vibration accelerometers for structural fatigue detection."
         )
-    elif "safety" in msg or "emergency" in msg:
+
+    # 7. Dashboard & System Features
+    elif "dashboard" in msg or "feature" in msg or "3d" in msg or "map" in msg:
         response = (
-            "In case of Warning, monitor anomalies. Critical states require backup cross-checks. In an Emergency, "
-            "AeroSentinel initiates pilot voice alerts, enables redundant primary flight computers, and calculates "
-            "emergency route paths to the nearest airfields."
+            "AeroSentinel provides an all-in-one safety monitoring console:\n\n"
+            "• 3D Interactive Digital Twin: Rotate and zoom a wireframe aircraft model highlighting faulty subsystems (Engine, Wings, Landing Gear, Cockpit) in Green/Yellow/Orange/Red.\n"
+            "• Diagnostic Test Bench: Inject manual telemetry anomalies to test safety alerts.\n"
+            "• Live Navigation Map: Leaflet CARTO dark tile tracking of flight vectors, weather cells, and emergency diversion runways.\n"
+            "• PDF / Excel Report Exporter: Compile formal safety audit documents."
         )
+
+    # 8. Technologies Used & Architecture
+    elif "tech" in msg or "stack" in msg or "architecture" in msg or "python" in msg or "next" in msg:
+        response = (
+            "AeroSentinel Tech Stack & Architecture:\n\n"
+            "• Frontend: Next.js 15, React 19, TypeScript, Tailwind CSS, Three.js (R3F), Leaflet, Recharts.\n"
+            "• Backend: Python FastAPI, Uvicorn, WebSockets, JWT Auth, ReportLab, openpyxl.\n"
+            "• AI & ML: Scikit-learn, XGBoost, SHAP, LIME, TensorFlow/PyTorch.\n"
+            "• DevOps: Docker, Docker Compose, Render, Vercel, GitHub Actions CI/CD."
+        )
+
+    # 9. System Workflow
+    elif "workflow" in msg or "process" in msg or "step" in msg:
+        response = (
+            "AeroSentinel 9-Step Operational Workflow:\n\n"
+            "1. Receive aircraft telemetry via ARINC data bus.\n"
+            "2. Validate incoming sensor ranges.\n"
+            "3. Process inputs using onboard Edge AI models.\n"
+            "4. Detect telemetry anomalies.\n"
+            "5. Predict subsystem failure probabilities.\n"
+            "6. Compute SHAP & LIME explainable explanations.\n"
+            "7. Display pilot decision support advisories.\n"
+            "8. Trigger visual/audio cockpit alerts if risk exceeds margins.\n"
+            "9. Log results into audit PDF/Excel reports."
+        )
+
+    # 10. Aircraft Subsystem specific questions (Engine, Hydraulics, Electrical, Fuel, Landing Gear)
+    elif "engine" in msg or "temp" in msg or "rpm" in msg:
+        response = (
+            "Engine core failures are predicted when core temperature exceeds 120°C accompanied by oil pressure drops below 38 PSI or over-revving RPM (>10,500). "
+            "SHAP attributes thermal stress weights to notify maintenance teams."
+        )
+    elif "hydraulic" in msg or "flaps" in msg:
+        response = (
+            "Hydraulic line leaks cause system pressure drops below 2,500 PSI. Combined with high airframe vibration (>5.5 mm/s), "
+            "this flags hydraulic and flight control surface degradation."
+        )
+
+    # 11. Out-of-Domain Question Handler
+    elif any(k in msg for k in ["football", "movie", "recipe", "crypto", "joke", "weather in tokio"]):
+        response = (
+            "I am AeroSentinel AI Assistant, specialized in aviation safety, Edge AI, and flight telemetry diagnostics. "
+            "While I primary focus on aerospace systems, I can help answer any questions regarding aircraft safety, sensor anomalies, or SHAP explainability!"
+        )
+
+    # 12. General Unclear Question Fallback
     else:
         response = (
-            "That is an interesting question, Captain! As an aviation safety bot, I can explain aircraft telemetry anomalies, "
-            "predictive maintenance algorithms, SHAP/LIME explainability, and Edge AI flight computer systems. "
-            "Could you specify which aircraft subsystem (Engine, Electrical, Fuel, Hydraulics) you're asking about?"
+            "I'm not completely sure what you mean. Could you please provide a little more detail about which aircraft subsystem, "
+            "Explainable AI feature (SHAP/LIME), or Edge AI module you'd like to explore?"
         )
         
     return {"response": response, "timestamp": datetime.now().isoformat()}
@@ -225,40 +292,30 @@ async def chat_query(req: ChatRequest):
 
 @app.websocket("/ws/telemetry")
 async def websocket_telemetry(websocket: WebSocket):
-    """
-    Simulates a live flight telemetry feed.
-    Pushes 15 sensors and AI predictions at 1Hz, periodically injecting failures.
-    """
     await websocket.accept()
     
-    # Simulation parameters
     tick = 0
-    altitude = 12000.0 # ft
-    speed = 340.0 # knots
-    heading = 270.0 # degrees
-    lat = 37.7749  # Start from SFO
+    altitude = 12000.0
+    speed = 340.0
+    heading = 270.0
+    lat = 37.7749
     lng = -122.4194
     anomaly_injected = None
     
     try:
         while True:
-            # Parse possible incoming manual anomaly injections from client
-            # (Non-blocking check if client sends data)
             try:
                 data = await asyncio.wait_for(websocket.receive_text(), timeout=0.01)
                 event = json.loads(data)
                 if event.get("type") == "inject_anomaly":
-                    anomaly_injected = event.get("subsystem") # e.g. "engine", "hydraulics"
-                    print(f"Injecting anomaly into subsystem: {anomaly_injected}")
+                    anomaly_injected = event.get("subsystem")
                 elif event.get("type") == "reset_anomaly":
                     anomaly_injected = None
-                    print("Resetting telemetry to nominal state")
             except asyncio.TimeoutError:
-                pass # No messages received from client, continue simulation
+                pass
             
             tick += 1
             
-            # Base nominal values + minor fluctuation
             engine_temp = 95.0 + math.sin(tick / 10.0) * 2.0
             oil_pressure = 55.0 + math.cos(tick / 8.0) * 1.5
             hydraulic_pressure = 3000.0 + math.sin(tick / 5.0) * 30.0
@@ -273,13 +330,11 @@ async def websocket_telemetry(websocket: WebSocket):
             cabin_temp = 22.0 + math.cos(tick / 25.0) * 0.5
             wind_speed = 15.0 + abs(math.sin(tick / 5.0)) * 5.0
             
-            # Simulated GPS update (flying westward)
             lat += 0.0005 * math.cos(math.radians(heading))
             lng += 0.0005 * math.sin(math.radians(heading))
-            altitude += math.sin(tick / 50.0) * 10.0 # minor altitude adjustments
+            altitude += math.sin(tick / 50.0) * 10.0
             speed += math.cos(tick / 40.0) * 2.0
             
-            # Apply injected anomalies
             if anomaly_injected == "engine":
                 engine_temp = 128.5 + (tick % 10) * 1.5
                 oil_pressure = 32.0 - (tick % 5) * 1.0
@@ -325,10 +380,8 @@ async def websocket_telemetry(websocket: WebSocket):
                 "timestamp": datetime.utcnow().isoformat() + "Z"
             }
             
-            # Predict safety
             prediction_res = predict_safety(sensor_payload)
             
-            # Combine into single broadcast frame
             broadcast_frame = {
                 "sensors": sensor_payload,
                 "prediction": prediction_res,
