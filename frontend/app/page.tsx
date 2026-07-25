@@ -3,12 +3,11 @@
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { 
-  ArrowRight, ShieldAlert, Cpu, Database, Gauge, CheckCircle2, ChevronRight, Activity, Terminal
+  ArrowRight, ShieldAlert, Cpu, Database, Gauge, CheckCircle2, ChevronRight, Activity, Terminal, MessageSquare, Bot, Sparkles, Mic, Volume2
 } from "lucide-react";
 import { useEffect, useState } from "react";
 
 export default function Home() {
-  const [activeStat, setActiveStat] = useState(0);
   const stats = [
     { label: "AI Prediction Accuracy", value: "99.8%" },
     { label: "Edge Telemetry Latency", value: "<1.8ms" },
@@ -16,16 +15,8 @@ export default function Home() {
     { label: "Prevented Component Failures", value: "324" }
   ];
 
-  // Rotate featured stats
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setActiveStat((prev) => (prev + 1) % stats.length);
-    }, 4000);
-    return () => clearInterval(timer);
-  }, []);
-
   return (
-    <div className="relative py-12 md:py-20 overflow-hidden">
+    <div className="relative py-12 md:py-20 overflow-hidden space-y-24">
       
       {/* Background meteor / floating particle lines */}
       <div className="absolute top-10 right-20 w-80 h-80 rounded-full bg-cyan-500/5 blur-3xl pointer-events-none" />
@@ -121,7 +112,7 @@ export default function Home() {
 
         </div>
 
-        {/* Right Column: Holographic animated UI (3D model placeholder/diagram) */}
+        {/* Right Column: Holographic animated UI */}
         <div className="lg:col-span-5 relative flex justify-center items-center">
           
           {/* Radar Sweep and sky grid background */}
@@ -152,7 +143,6 @@ export default function Home() {
               className="absolute z-10 w-48 text-cyan-400 filter drop-shadow-[0_0_15px_rgba(34,211,238,0.3)]"
             >
               <svg viewBox="0 0 24 24" className="w-full h-full fill-none stroke-current" strokeWidth="0.8">
-                {/* Airplane wireframe */}
                 <path d="M12 2L2 22h8l2-4 2 4h8L12 2zM12 18V2" />
                 <path d="M6 14l6-6 6 6" />
                 <circle cx="12" cy="10" r="1.5" className="fill-cyan-500 animate-ping" />
@@ -194,8 +184,86 @@ export default function Home() {
 
       </div>
 
+      {/* Featured AI Chatbot Section */}
+      <div className="bg-gradient-to-r from-slate-950 via-slate-900 to-slate-950 border border-slate-850 p-8 sm:p-12 rounded-3xl relative overflow-hidden">
+        <div className="absolute -top-12 -right-12 w-64 h-64 rounded-full bg-cyan-500/10 blur-3xl pointer-events-none" />
+        
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+          
+          {/* Left: Chatbot Orb Interactive Graphic */}
+          <div className="lg:col-span-4 flex flex-col items-center justify-center text-center space-y-4">
+            <div className="relative flex h-24 w-24 items-center justify-center rounded-full bg-slate-950 border-2 border-cyan-400 shadow-2xl shadow-cyan-500/30">
+              <div className="relative flex flex-col items-center justify-center gap-1 h-16 w-16 rounded-full bg-cyan-400/20 border border-cyan-400/50 shadow-inner shadow-cyan-400/60 animate-pulse">
+                <div className="flex gap-3">
+                  <span className="h-2 w-2 bg-cyan-300 rounded-full animate-ping" />
+                  <span className="h-2 w-2 bg-cyan-300 rounded-full animate-ping" />
+                </div>
+                <div className="flex gap-0.5 items-end h-3 mt-1">
+                  <span className="w-1 h-2 bg-cyan-400 rounded-full animate-bounce" style={{ animationDelay: "100ms" }} />
+                  <span className="w-1 h-3 bg-cyan-400 rounded-full animate-bounce" style={{ animationDelay: "200ms" }} />
+                  <span className="w-1 h-2 bg-cyan-400 rounded-full animate-bounce" style={{ animationDelay: "300ms" }} />
+                </div>
+              </div>
+            </div>
+            <div>
+              <h3 className="text-lg font-black text-white tracking-wide">AERO AI ASSISTANT</h3>
+              <div className="flex items-center justify-center gap-1.5 mt-1">
+                <span className="h-2 w-2 rounded-full bg-emerald-400 animate-ping" />
+                <span className="text-[10px] font-bold text-emerald-400 uppercase tracking-widest">VOICE-ENABLED ONBOARD AGENT</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Right: Pitch & Voice capability features */}
+          <div className="lg:col-span-8 space-y-6">
+            <div>
+              <span className="text-[10px] font-bold text-cyan-400 uppercase tracking-widest block">NATURAL LANGUAGE DECISION SUPPORT</span>
+              <h2 className="text-2xl sm:text-3xl font-extrabold text-white mt-1">
+                Ask Aero about flight faults, SHAP metrics, or edge hardware.
+              </h2>
+              <p className="text-xs sm:text-sm text-slate-400 leading-relaxed mt-2">
+                Aero is equipped with speech recognition (STT) and text-to-speech (TTS) synthesis. Click the floating blue orb at the bottom right corner of any page to ask flight crew questions in real-time.
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 font-mono text-xs">
+              <div className="bg-slate-950 p-4 rounded-2xl border border-slate-850 space-y-2">
+                <div className="flex items-center gap-2 text-cyan-400 font-bold">
+                  <Mic className="h-4 w-4" />
+                  <span>Speech-to-Text</span>
+                </div>
+                <p className="text-[11px] text-slate-500 font-sans leading-normal">
+                  Speak flight queries via your microphone.
+                </p>
+              </div>
+
+              <div className="bg-slate-950 p-4 rounded-2xl border border-slate-850 space-y-2">
+                <div className="flex items-center gap-2 text-cyan-400 font-bold">
+                  <Volume2 className="h-4 w-4" />
+                  <span>Voice Synthesis</span>
+                </div>
+                <p className="text-[11px] text-slate-500 font-sans leading-normal">
+                  Listens to spoken cockpit advisories.
+                </p>
+              </div>
+
+              <div className="bg-slate-950 p-4 rounded-2xl border border-slate-850 space-y-2">
+                <div className="flex items-center gap-2 text-cyan-400 font-bold">
+                  <Sparkles className="h-4 w-4" />
+                  <span>XAI Explanations</span>
+                </div>
+                <p className="text-[11px] text-slate-500 font-sans leading-normal">
+                  Decodes SHAP & LIME risk metrics instantly.
+                </p>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
       {/* Feature grid Section */}
-      <div className="mt-24 md:mt-32 border-t border-slate-900 pt-20">
+      <div className="border-t border-slate-900 pt-16">
         <div className="text-center max-w-2xl mx-auto space-y-4">
           <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-white">
             Comprehensive Predictive Intelligence

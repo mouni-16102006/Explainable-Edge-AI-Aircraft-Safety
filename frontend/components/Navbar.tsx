@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { 
-  Activity, ShieldAlert, Cpu, MapPin, Brain, User, LogOut, Menu, X, Radio
+  Activity, ShieldAlert, Cpu, MapPin, Brain, User, LogOut, Menu, X, Radio, MessageSquare
 } from "lucide-react";
 
 export default function Navbar() {
@@ -14,7 +14,6 @@ export default function Navbar() {
   const [user, setUser] = useState<any>(null);
   const [wsConnected, setWsConnected] = useState(false);
 
-  // Poll local storage for logged-in user and watch socket connection status
   useEffect(() => {
     const storedUser = localStorage.getItem("user");
     if (storedUser) {
@@ -26,7 +25,6 @@ export default function Navbar() {
     }
 
     const checkWs = () => {
-      // Check if global socket is open (stored on window or active)
       const wsStatus = (window as any).isTelemetrySocketOpen;
       setWsConnected(!!wsStatus);
     };
@@ -90,6 +88,12 @@ export default function Navbar() {
 
         {/* Telemetry Indicator + Auth */}
         <div className="hidden md:flex items-center space-x-4">
+          {/* Aero AI Assistant trigger button */}
+          <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-cyan-500/30 bg-cyan-950/30 text-cyan-400 text-xs font-bold shadow-sm">
+            <MessageSquare className="h-3.5 w-3.5 animate-pulse" />
+            <span>AERO CHATBOT ONLINE</span>
+          </div>
+
           {/* Live Feed Status */}
           <div className="flex items-center space-x-2 bg-slate-900/80 border border-slate-800 px-3 py-1.5 rounded-lg text-xs font-medium">
             <Radio className={`h-3 w-3 ${wsConnected ? "text-emerald-400 animate-pulse" : "text-rose-500"}`} />
@@ -126,7 +130,6 @@ export default function Navbar() {
 
         {/* Mobile menu button */}
         <div className="flex md:hidden items-center space-x-2">
-          {/* Status Indicator (Mobile) */}
           <div className="flex items-center justify-center p-1.5 rounded-lg bg-slate-900 border border-slate-800">
             <Radio className={`h-4 w-4 ${wsConnected ? "text-emerald-400 animate-pulse" : "text-rose-500"}`} />
           </div>
