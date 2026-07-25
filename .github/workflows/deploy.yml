@@ -1,0 +1,52 @@
+name: AeroSentinel CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  test-backend:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.11"
+      - name: Install Dependencies
+        run: |
+          cd backend
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+      - name: Verify Model Training & Syntax
+        run: |
+          cd backend
+          python -c "from app.model import predict_safety; print(predict_safety({'engine_temp': 95}))"
+
+  build-frontend:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+      - name: Install Frontend Packages
+        run: |
+          cd frontend
+          npm ci --legacy-peer-deps
+      - name: Build Next.js Production Bundle
+        run: |
+          cd frontend
+          npm run build
+
+  docker-build:
+    needs: [test-backend, build-frontend]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Build Docker Compose Stack
+        run: |
+          docker compose build
