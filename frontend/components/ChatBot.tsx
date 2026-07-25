@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { MessageSquare, X, Send, Mic, Volume2, VolumeX, Sparkles, Bot } from "lucide-react";
+import { MessageSquare, X, Send, Mic, Volume2, VolumeX, Sparkles, Bot, User } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 interface Message {
@@ -69,9 +69,8 @@ export default function ChatBot() {
   // Text to Speech (TTS) helper
   const speakText = (text: string) => {
     if (!voiceEnabled) return;
-    window.speechSynthesis.cancel(); // clear queue
+    window.speechSynthesis.cancel();
     const utterance = new SpeechSynthesisUtterance(text);
-    // Find a nice female/clearcut English voice if possible
     const voices = window.speechSynthesis.getVoices();
     const synthVoice = voices.find(v => v.lang.includes("en-US") && v.name.includes("Google")) || voices[0];
     if (synthVoice) utterance.voice = synthVoice;
@@ -140,7 +139,6 @@ export default function ChatBot() {
             {/* Header */}
             <div className="flex items-center justify-between border-b border-slate-900 bg-slate-900/40 px-4 py-3.5">
               <div className="flex items-center space-x-3">
-                {/* Micro Orb logo */}
                 <div className="relative flex h-8 w-8 items-center justify-center rounded-full bg-cyan-500/10 border border-cyan-500/20">
                   <span className="h-4 w-4 bg-cyan-400 rounded-full animate-pulse shadow-md shadow-cyan-400/50" />
                 </div>
@@ -179,7 +177,6 @@ export default function ChatBot() {
                 <div key={index} className={`flex ${msg.sender === "user" ? "justify-end" : "justify-start"}`}>
                   <div className={`flex gap-2 max-w-[82%] ${msg.sender === "user" ? "flex-row-reverse" : "flex-row"}`}>
                     
-                    {/* Bot avatar or user avatar icon */}
                     {msg.sender === "aero" ? (
                       <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-cyan-950 border border-cyan-800 text-cyan-400">
                         <Bot className="h-4 w-4" />
@@ -262,17 +259,13 @@ export default function ChatBot() {
         whileTap={{ scale: 0.95 }}
         className="relative group flex h-14 w-14 items-center justify-center rounded-full bg-slate-950 border-2 border-cyan-500/80 shadow-lg shadow-cyan-500/20 overflow-hidden cursor-pointer"
       >
-        {/* Glow Background */}
         <div className="absolute inset-0 bg-gradient-to-tr from-cyan-500/20 to-blue-500/20 group-hover:scale-110 transition-transform" />
         
-        {/* Orb Core with Eye animations */}
         <div className="relative flex flex-col items-center justify-center gap-0.5 h-10 w-10 rounded-full bg-cyan-400/20 border border-cyan-400/40 shadow-inner shadow-cyan-400/50 animate-pulse">
-          {/* Eyes */}
           <div className="flex gap-2.5">
             <span className="h-1.5 w-1.5 bg-cyan-300 rounded-full shadow-glow animate-ping" />
             <span className="h-1.5 w-1.5 bg-cyan-300 rounded-full shadow-glow animate-ping" />
           </div>
-          {/* Breathing Mouthwave (represented as line bar nodes when speaking / idle) */}
           <div className="flex gap-0.5 items-end h-2 mt-1">
             <span className="w-0.5 h-1 bg-cyan-400 rounded-full animate-bounce" style={{ animationDelay: "100ms" }} />
             <span className="w-0.5 h-2 bg-cyan-400 rounded-full animate-bounce" style={{ animationDelay: "200ms" }} />
@@ -280,7 +273,6 @@ export default function ChatBot() {
           </div>
         </div>
 
-        {/* Dynamic Halo Sweeps */}
         <div className="absolute inset-0 border border-cyan-400/25 rounded-full scale-95 group-hover:scale-105 transition-all duration-700 animate-spin" />
       </motion.button>
     </div>
